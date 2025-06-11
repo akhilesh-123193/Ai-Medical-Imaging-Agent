@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Medical Imaging Agent (Proof-of-Concept)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="file"],
+        textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box; /* Include padding in width */
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .disclaimer {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffeeba;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        #loading {
+            text-align: center;
+            margin-top: 20px;
+            font-style: italic;
+            color: #666;
+            display: none; /* Hidden by default */
+        }
+        #imagePreviewContainer img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 15px auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #aiOutput {
+            white-space: pre-wrap; /* Preserves whitespace and line breaks */
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            line-height: 1.6;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Medical Imaging Agent (PoC)</h1>
+
+        <div class="disclaimer">
+            Disclaimer: This is a proof-of-concept AI agent. Its analysis is for informational purposes only and is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for any medical concerns.
+        </div>
+
+        <form id="medicalForm">
+            <div class="form-group">
+                <label for="medicalImage">Upload Medical Image (e.g., X-ray, CT):</label>
+                <input type="file" id="medicalImage" name="medicalImage" accept="image/*" required>
+            </div>
+            <div class="form-group">
+                <label for="patientHistory">Patient Clinical History/Symptoms:</label>
+                <textarea id="patientHistory" name="patientHistory" placeholder="e.g., 55-year-old male, persistent cough for 2 weeks, mild fever, shortness of breath."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="referralNotes">Referring Physician's Notes/Specific Questions:</label>
+                <textarea id="referralNotes" name="referralNotes" placeholder="e.g., Rule out pneumonia. Assess for cardiomegaly."></textarea>
+            </div>
+            <button type="submit">Analyze Image</button>
+        </form>
+
+        <p id="loading" style="display: none;">Analyzing image... Please wait.</p>
+        <p id="errorMessage" class="error-message" style="display: none;"></p>
+
+        <div class="results" id="resultsSection" style="display: none;">
+            <h2>Analysis Results</h2>
+            <div id="imagePreviewContainer">
+                <h3>Uploaded Image:</h3>
+                <img id="uploadedImage" src="#" alt="Uploaded Medical Image">
+            </div>
+            <h3>AI Generated Report:</h3>
+            <pre id="aiOutput"></pre>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('medicalForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const loadingMessage = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const resultsSection = document.getElementById('resultsSection');
+            const aiOutput = document.getElementById('aiOutput');
+            const uploadedImage = document.getElementById('uploadedImage');
+
+            loadingMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            resultsSection.style.display = 'none';
+            aiOutput.textContent = '';
+            uploadedImage.src = '#'; // Clear previous image
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    aiOutput.textContent = data.aiAnalysis;
+                    uploadedImage.src = 'data:image/jpeg;base64,' + data.imagePreview; // Assuming JPEG output
+                    resultsSection.style.display = 'block';
+                } else {
+                    errorMessage.textContent = data.error || 'An unknown error occurred.';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                errorMessage.textContent = 'Network error or server unavailable. Please try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                loadingMessage.style.display = 'none';
+            }
+        });
+
+        // Optional: Live image preview before upload
+        document.getElementById('medicalImage').addEventListener('change', function(event) {
+            const [file] = event.target.files;
+            if (file) {
+                document.getElementById('uploadedImage').src = URL.createObjectURL(file);
+                document.getElementById('imagePreviewContainer').style.display = 'block';
+            } else {
+                document.getElementById('imagePreviewContainer').style.display = 'none';
+                document.getElementById('uploadedImage').src = '#';
+            }
+        });
+    </script>
+</body>
+</html>

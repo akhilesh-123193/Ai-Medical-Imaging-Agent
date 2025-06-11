@@ -1,0 +1,6 @@
+# requirements.txt
+google-generativeai
+Flask
+Pillow
+pydicom # For handling DICOM files, though we'll use JPEGs for simplicity in this example
+python-dotenv # Optional, for managing environment variables better than config.py
