@@ -1,0 +1,754 @@
+/* Basic Resets & Global Styles */
+:root {
+    --primary-bg: #1a1a1a; /* Very dark background */
+    --secondary-bg: #222222; /* Slightly lighter for sections/sidebar */
+    --tertiary-bg: #2b2b2b; /* Even lighter for inputs/cards */
+    --text-color: #e0e0e0; /* Light gray text */
+    --heading-color: #ffffff; /* White for main headings */
+    --accent-color: #8a2be2; /* BlueViolet - a modern, deep purple for accents */
+    --border-color: #444444; /* Dark gray for borders */
+    --error-color: #ff6347; /* Tomato for errors */
+    --success-color: #3cb371; /* MediumSeaGreen for success */
+    --shadow-color: rgba(0, 0, 0, 0.5); /* Darker shadow for depth */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden; /* Prevent horizontal scroll due to sidebar transitions */
+}
+
+.container {
+    display: flex;
+    width: 100%;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 300px;
+    background-color: var(--secondary-bg);
+    padding: 20px;
+    box-shadow: 2px 0 15px var(--shadow-color);
+    transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    border-right: 1px solid var(--border-color);
+    overflow: hidden; /* Hide content that goes beyond width during collapse */
+}
+
+.sidebar.collapsed {
+    width: 70px; /* Width when collapsed */
+}
+
+.sidebar-header {
+    display: flex;
+    flex-direction: row-reverse; /* Put toggle button on the right */
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-title {
+    color: var(--heading-color);
+    font-size: 1.5em;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out;
+    white-space: nowrap; /* Prevent wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1; /* Allow title to take remaining space */
+    margin-right: 15px; /* Space between title and toggle */
+}
+
+.sidebar.collapsed .sidebar-title {
+    opacity: 0;
+    width: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+}
+
+.sidebar-title i {
+    margin-right: 10px;
+    color: var(--accent-color);
+    transition: opacity 0.3s ease-in-out;
+}
+
+.sidebar.collapsed .sidebar-title i {
+    opacity: 0; /* Also hide the icon when title collapses */
+}
+
+.toggle-sidebar {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.5em; /* Larger icon */
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.2s ease, transform 0.3s ease-in-out;
+}
+
+.toggle-sidebar:hover {
+    color: var(--accent-color);
+}
+
+/* Icon rotation based on sidebar state */
+.sidebar-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar.collapsed .sidebar-icon.fa-bars {
+    /* No rotation needed, JS will swap icon to fa-chevron-right */
+}
+/* This requires JS to swap classes properly or a trick with pseudo-elements */
+/* Better to handle icon swap in JS for simplicity */
+
+
+.past-analyses-list {
+    list-style: none;
+    padding: 0;
+}
+
+.past-analyses-list li {
+    background-color: var(--tertiary-bg);
+    margin-bottom: 10px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease, opacity 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column; /* Stack summary and date */
+    align-items: flex-start; /* Align text to left */
+    border: 1px solid transparent;
+    overflow: hidden; /* Hide overflowing text during collapse */
+    position: relative; /* For delete button positioning */
+}
+
+.past-analyses-list li:hover {
+    background-color: #3a3a3a;
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.past-analyses-list li.active {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: bold;
+    border-color: var(--accent-color);
+}
+
+.past-analyses-list li span.summary-text {
+    font-weight: bold;
+    color: var(--heading-color); /* Make summary text brighter */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: calc(100% - 30px); /* Account for delete button space */
+    transition: opacity 0.3s ease-in-out;
+}
+
+.past-analyses-list li small.timestamp-text {
+    font-size: 0.8em;
+    color: #bbb;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: calc(100% - 30px);
+    transition: opacity 0.3s ease-in-out;
+}
+
+.sidebar.collapsed .past-analyses-list li span.summary-text,
+.sidebar.collapsed .past-analyses-list li small.timestamp-text {
+    opacity: 0;
+    width: 0;
+    padding: 0;
+    margin: 0;
+    height: 0;
+}
+
+.past-analyses-list li .delete-btn {
+    background: none;
+    border: none;
+    color: #ff6347;
+    font-size: 1.1em; /* Larger delete icon */
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+
+.past-analyses-list li .delete-btn:hover {
+    opacity: 1;
+    color: red;
+}
+
+.sidebar.collapsed .past-analyses-list li .delete-btn {
+    display: none; /* Hide delete button in collapsed state */
+}
+
+.past-analyses-list .no-history {
+    text-align: center;
+    color: #888;
+    margin-top: 20px;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.sidebar.collapsed .no-history {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+/* Main Content Styling */
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+    transition: margin-left 0.3s ease; /* Adjust margin if sidebar pushes it */
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+header h1 {
+    color: var(--heading-color);
+    font-size: 2.8em;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+header h1 i {
+    margin-right: 15px;
+    color: var(--accent-color);
+    font-size: 1em;
+}
+
+header p {
+    color: #bbb;
+    font-size: 1.1em;
+}
+
+section {
+    background-color: var(--secondary-bg);
+    padding: 30px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: 0 6px 20px var(--shadow-color); /* More pronounced shadow */
+}
+
+section h2 {
+    color: var(--heading-color);
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+section h2 i {
+    margin-right: 10px;
+    color: var(--accent-color);
+}
+
+/* Form Styling */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+label .required {
+    color: var(--error-color);
+    margin-left: 4px;
+}
+
+input[type="file"],
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--tertiary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 1em;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="file"]::file-selector-button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 15px;
+    transition: background-color 0.2s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background-color: #7220bd;
+}
+
+input[type="file"]:focus,
+textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.3);
+    outline: none;
+}
+
+small {
+    display: block;
+    color: #999;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+
+.submit-btn {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+}
+
+.submit-btn i {
+    margin-right: 10px;
+}
+
+.submit-btn:hover {
+    background-color: #7220bd;
+    transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Results Section */
+.results-section {
+    position: relative; /* For loading spinner overlay */
+}
+
+.analysis-container {
+    background-color: var(--tertiary-bg);
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+/* Most Likely Section */
+.most-likely-section {
+    background-color: #36264d; /* A darker purple, related to accent */
+    border: 1px solid var(--accent-color);
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--heading-color);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.most-likely-section i {
+    margin-right: 12px;
+    color: var(--success-color); /* Use a success color for the icon */
+    font-size: 1.3em;
+}
+
+.most-likely-section .most-likely-text {
+    flex-grow: 1; /* Allow text to fill space */
+}
+
+
+/* New Grid for Image and Visual Findings */
+.image-analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two columns, equal width */
+    gap: 20px; /* Space between columns */
+    margin-bottom: 30px;
+}
+
+.image-preview-column,
+.visual-findings-column {
+    background-color: #333;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.image-preview-column h3,
+.visual-findings-column h3 {
+    color: var(--heading-color);
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 10px;
+}
+
+
+.image-preview-container {
+    min-height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    height: 300px; /* Fixed height for consistency */
+    background-color: #1f1f1f; /* Darker background for preview area */
+    border: 1px dashed rgba(138, 43, 226, 0.3); /* Accent dashed border */
+    border-radius: 5px;
+}
+
+#imagePreview {
+    max-width: 100%;
+    max-height: 100%; /* Fill container height */
+    object-fit: contain;
+    border-radius: 3px;
+    display: none; /* Controlled by JS */
+}
+
+#noImageText {
+    color: #888;
+    font-style: italic;
+    display: block; /* Controlled by JS */
+}
+
+/* Visual Findings Container (Cloud Design) */
+.visual-findings-container {
+    background-color: #1f1f1f; /* Same as AI analysis output */
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 300px; /* Match image preview height */
+    overflow-y: auto;
+    font-size: 0.95em;
+    line-height: 1.7;
+    position: relative; /* For placeholder positioning */
+}
+
+.visual-findings-container .placeholder {
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+    position: absolute; /* Center placeholder */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+}
+
+.visual-findings-container h4 { /* Styling for Location headings */
+    color: var(--accent-color);
+    font-size: 1.1em;
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+}
+.visual-findings-container p { /* Styling for importance paragraphs */
+    margin-bottom: 1em;
+}
+
+/* AI Analysis Output Styling (Markdown Rendering) */
+.ai-analysis-output {
+    background-color: #1f1f1f;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    padding: 20px 25px; /* More horizontal padding */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 600px;
+    overflow-y: auto;
+    font-size: 1.0em; /* Slightly larger font */
+    line-height: 1.8; /* Improved line spacing for readability */
+    color: var(--text-color);
+}
+
+.ai-analysis-output p.placeholder {
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Specific Markdown elements styling */
+.ai-analysis-output h1,
+.ai-analysis-output h2,
+.ai-analysis-output h3,
+.ai-analysis-output h4,
+.ai-analysis-output h5,
+.ai-analysis-output h6 {
+    color: var(--accent-color);
+    margin-top: 1.8em; /* More space above headings */
+    margin-bottom: 0.8em;
+    line-height: 1.2;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(138, 43, 226, 0.3); /* Subtle accent underline */
+}
+
+.ai-analysis-output h1 { font-size: 1.8em; }
+.ai-analysis-output h2 { font-size: 1.6em; }
+.ai-analysis-output h3 { font-size: 1.4em; }
+.ai-analysis-output h4 { font-size: 1.2em; }
+.ai-analysis-output p {
+    margin-bottom: 1em; /* Space between paragraphs */
+}
+
+.ai-analysis-output strong {
+    color: var(--heading-color); /* Make bold text stand out */
+    font-weight: 700; /* Ensure it's very bold */
+}
+
+.ai-analysis-output ul,
+.ai-analysis-output ol {
+    margin-left: 25px;
+    margin-bottom: 1.5em; /* Space after lists */
+    padding-left: 0;
+    list-style-position: outside;
+}
+
+.ai-analysis-output ul li {
+    list-style-type: disc;
+    margin-bottom: 0.7em; /* Space between list items */
+}
+
+.ai-analysis-output ol li {
+    list-style-type: decimal;
+    margin-bottom: 0.7em;
+}
+
+.ai-analysis-output blockquote {
+    border-left: 4px solid var(--accent-color);
+    padding: 10px 15px;
+    margin: 1em 0;
+    background-color: #272727;
+    color: #ccc;
+    font-style: italic;
+}
+
+.ai-analysis-output a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.ai-analysis-output a:hover {
+    text-decoration: underline;
+}
+
+
+/* Footer Styling */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 30px;
+    border-top: 1px solid var(--border-color);
+    color: #aaa;
+    font-size: 0.9em;
+}
+
+footer p {
+    margin-bottom: 5px;
+}
+
+footer .fa-exclamation-triangle {
+    color: var(--error-color);
+    margin-right: 5px;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    box-sizing: border-box; /* Ensure padding/border don't expand size */
+}
+
+.loading-spinner .spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid var(--accent-color);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+.loading-spinner p {
+    color: white;
+    font-size: 1.1em;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 250px;
+    }
+    .image-analysis-grid {
+        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+    }
+    .image-preview-column,
+    .visual-findings-column {
+        height: auto; /* Allow content to dictate height */
+        min-height: 250px; /* Ensure a minimum height */
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        padding: 15px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar.collapsed {
+        height: 70px; /* Height when collapsed */
+        overflow: hidden;
+    }
+
+    .sidebar-header {
+        margin-bottom: 15px;
+        flex-direction: row; /* Reset to row for smaller screens */
+    }
+
+    .sidebar-title {
+        font-size: 1.3em;
+        opacity: 1; /* Keep visible on mobile even if collapsed */
+        width: auto;
+        flex-grow: 0; /* Don't grow to fill space */
+        margin-right: 15px; /* space before toggle */
+        order: 1; /* Place title first in flex order */
+    }
+    .toggle-sidebar {
+        order: 2; /* Place toggle second in flex order */
+        margin-left: auto; /* Push to right */
+    }
+
+    .sidebar.collapsed .sidebar-title {
+        opacity: 1;
+        width: auto;
+        height: auto;
+        padding: inherit;
+        margin: inherit;
+    }
+
+    .sidebar.collapsed .sidebar-icon.fa-bars {
+        transform: rotate(0deg); /* No rotation on mobile collapsed */
+    }
+    .sidebar.collapsed .sidebar-icon.fa-chevron-right {
+        transform: rotate(90deg); /* Down arrow when expanded on mobile */
+    }
+
+
+    .past-analyses-list li span.summary-text,
+    .past-analyses-list li small.timestamp-text,
+    .no-history {
+        opacity: 1; /* Keep visible on mobile even if collapsed */
+        width: auto;
+        height: auto;
+        padding: inherit;
+        margin: inherit;
+    }
+
+    .sidebar.collapsed .past-analyses-list li {
+        display: none; /* Hide individual items when collapsed on mobile */
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    header h1 {
+        font-size: 2em;
+    }
+
+    section {
+        padding: 20px;
+    }
+
+    .submit-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.8em;
+    }
+    header h1 i {
+        margin-right: 10px;
+    }
+    header p {
+        font-size: 1em;
+    }
+    section h2 {
+        font-size: 1.6em;
+    }
+    .submit-btn {
+        font-size: 1em;
+        padding: 12px 20px;
+    }
+    .ai-analysis-output {
+        padding: 15px 20px;
+    }
+}

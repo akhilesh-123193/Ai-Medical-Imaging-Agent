@@ -121,6 +121,13 @@ def analyze_medical_image():
 - Recommend consultation with specialists.
 - Provide general treatment considerations.
 
+### 6. Visual Annotation Points & Clinical Importance (Textual Description)
+- **Location 1:** [Describe the exact location of a key finding, e.g., 'Mid-shaft of the left femur']
+    - **Clinical Importance:** [Explain the significance of this specific location, e.g., 'Common site for stress fractures in athletes, or typical location for primary bone tumors.']
+- **Location 2:** [If applicable, describe another key location]
+    - **Clinical Importance:** [Its significance]
+- If no specific 'points' are obvious for visual annotation, state 'No specific discrete points for visual annotation.'
+
 **IMPORTANT DISCLAIMER**: This analysis is for educational purposes only and should not replace professional medical diagnosis or treatment. Always consult with qualified healthcare professionals for medical decisions.
 
 Ensure a structured and medically accurate response using clear markdown formatting."""
